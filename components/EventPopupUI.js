@@ -50,6 +50,7 @@ export class EventPopupUI {
                     <div class="event-footer">
                         <small>Your choice will affect your cash, reputation, and operations.</small>
                     </div>
+                    <button class="cancel-btn" style="margin-top:1rem;" onclick="window.gameInstance.components.eventPopup.hide()">Cancel</button>
                 </div>
             </div>
         `;

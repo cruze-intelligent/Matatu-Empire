@@ -103,6 +103,10 @@ export class WeatherManager {
             </div>
         `;
         
+        popup.innerHTML += `
+            <button class="cancel-btn" style="margin-top:1rem;" onclick="this.parentNode.remove()">Dismiss</button>
+        `;
+
         // Add click to dismiss
         popup.addEventListener('click', () => {
             popup.style.opacity = '0';

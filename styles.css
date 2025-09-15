@@ -535,6 +535,14 @@ header h1 {
     overflow: hidden !important;
 }
 
+.create-route-btn {
+    margin-right: 1rem !important;
+}
+
+.delete-route-btn {
+    margin-left: 0.5rem !important;
+}
+
 /* Instructions styling */
 .route-creation-instructions,
 .route-deletion-instructions {
@@ -719,7 +727,6 @@ header h1 {
     }
 }
 
-/* Mobile Responsive Breakpoints */
 @media only screen and (max-width: 1024px) {
     #game-container {
         grid-template-columns: 350px 1fr !important;
@@ -907,6 +914,36 @@ header h1 {
     
     .stat-row {
         font-size: 0.8rem !important;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    #game-container {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto 1fr !important;
+        height: 100vh !important;
+    }
+    #main-panel, #dashboard-container, #fleet-container {
+        margin: 0 !important;
+        border-radius: 0 !important;
+        padding: 1rem !important;
+    }
+    #map-area, #map-container {
+        min-height: 300px !important;
+        height: 300px !important;
+    }
+    .modal-container {
+        align-items: flex-start !important;
+        padding-top: 40px !important;
+    }
+    .route-details-content, .route-selector-content {
+        max-width: 98vw !important;
+        padding: 1rem !important;
+        font-size: 0.95rem !important;
+    }
+    .vehicle-item {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
     }
 }
 
@@ -1269,4 +1306,31 @@ header h1 {
     #weather-alerts {
         display: none !important;
     }
+}
+
+.repair-btn {
+    background: var(--secondary-color, #388e3c);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-right: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.repair-btn:hover {
+    background: #2e7d32;
+}
+
+.routes-list, .available-vehicles {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    padding-right: 5px !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--primary-color) var(--bg-dark) !important;
+}
+.routes-list::-webkit-scrollbar, .available-vehicles::-webkit-scrollbar {
+    width: 6px !important;
 }

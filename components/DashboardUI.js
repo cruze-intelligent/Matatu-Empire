@@ -289,43 +289,40 @@ export class DashboardUI {
     renderVehicleActions(vehicle) {
         const vehicleType = this.game.managers.vehicle.getVehicleType(vehicle.typeId);
         const sellValue = vehicleType ? Math.round(vehicleType.cost * 0.6) : 1000;
-        
         let actions = '';
-        
+
         if (vehicle.status === 'running') {
-            actions += `<button class="unassign-btn" onclick="window.gameInstance.unassignVehicleFromRoute(${vehicle.id}, '${vehicle.routeId}')" title="Stop vehicle">
-                        ⏹️ Stop
-                        </button>`;
+            actions += `<button class="unassign-btn" onclick="window.gameInstance.unassignVehicleFromRoute(${vehicle.id}, '${vehicle.routeId}')">
+                ⏹️ Stop
+            </button>`;
         } else {
-            actions += `<button class="assign-btn" onclick="window.gameInstance.components.dashboard.showRouteSelector(${vehicle.id})" title="Assign to route">
-                        ▶️ Assign Route
-                        </button>`;
+            actions += `<button class="assign-btn" onclick="window.gameInstance.components.dashboard.showRouteSelector(${vehicle.id})">
+                ▶️ Assign Route
+            </button>`;
         }
-        
-        // Maintenance actions
-        if (vehicle.fuel < 80) {
-            const refuelCost = Math.round((100 - vehicle.fuel) * 20);
-            actions += `<button class="refuel-btn" onclick="window.gameInstance.components.dashboard.refuelVehicle(${vehicle.id})" title="Refuel vehicle">
-                       ⛽ Refuel (Ksh ${refuelCost.toLocaleString()})
-                       </button>`;
-        }
-        
-        if (vehicle.condition < 70) {
+
+        // Add Repair button if needed
+        if (vehicle.condition < 100) {
             const repairCost = Math.round((100 - vehicle.condition) * 100);
-            actions += `<button class="repair-btn" onclick="window.gameInstance.components.dashboard.repairVehicle(${vehicle.id})" title="Repair vehicle">
-                       🔧 Repair (Ksh ${repairCost.toLocaleString()})
-                       </button>`;
+            actions += `<button class="repair-btn" onclick="window.gameInstance.components.dashboard.repairVehicle(${vehicle.id})">
+                🔧 Repair (Ksh ${repairCost.toLocaleString()})
+            </button>`;
         }
-        
-        // Other actions
-        actions += `<button class="nickname-btn" onclick="window.gameInstance.components.dashboard.editVehicleNickname(${vehicle.id})" title="Edit nickname">
-                   ✏️ Nickname
-                   </button>`;
-        
-        actions += `<button class="sell-btn" onclick="window.gameInstance.components.dashboard.sellVehicle(${vehicle.id})" title="Sell vehicle">
-                   💰 Sell (Ksh ${sellValue.toLocaleString()})
-                   </button>`;
-        
+
+        if (vehicle.fuel < 100) {
+            const refuelCost = Math.round((100 - vehicle.fuel) * 20);
+            actions += `<button class="refuel-btn" onclick="window.gameInstance.components.dashboard.refuelVehicle(${vehicle.id})">
+                ⛽ Refuel (Ksh ${refuelCost.toLocaleString()})
+            </button>`;
+        }
+
+        actions += `<button class="nickname-btn" onclick="window.gameInstance.components.dashboard.editVehicleNickname(${vehicle.id})">
+            ✏️ Nickname
+        </button>`;
+        actions += `<button class="sell-btn" onclick="window.gameInstance.components.dashboard.sellVehicle(${vehicle.id})">
+            💰 Sell (Ksh ${sellValue.toLocaleString()})
+        </button>`;
+
         return `<div class="vehicle-actions">${actions}</div>`;
     }
 
@@ -431,7 +428,6 @@ export class DashboardUI {
                     <h3>🛣️ ${route.name}</h3>
                     <button class="route-close-btn">×</button>
                 </div>
-                
                 <div class="route-info">
                     <div class="route-stats">
                         <div class="stat">
@@ -459,9 +455,6 @@ export class DashboardUI {
                             <span class="value">${route.risk}/10</span>
                         </div>
                     </div>
-                </div>
-                
-                ${assignedVehicles.length > 0 ? `
                     <div class="assigned-vehicles">
                         <h4>🚐 Currently Assigned (${assignedVehicles.length})</h4>
                         ${assignedVehicles.map(vehicle => `
@@ -478,26 +471,25 @@ export class DashboardUI {
                             </div>
                         `).join('')}
                     </div>
-                ` : ''}
-                
-                ${availableVehicles.length > 0 ? `
                     <div class="available-vehicles">
                         <h4>🎯 Available Vehicles (${availableVehicles.length})</h4>
-                        ${availableVehicles.map(vehicle => `
-                            <div class="vehicle-item">
-                                <div class="vehicle-info">
-                                    <span class="vehicle-name">${vehicle.name}</span>
-                                    <span class="vehicle-condition">
-                                        ⛽${Math.round(vehicle.fuel)}% 🔧${Math.round(vehicle.condition)}%
-                                    </span>
+                        ${availableVehicles.length > 0 ? `
+                            ${availableVehicles.map(vehicle => `
+                                <div class="vehicle-item">
+                                    <div class="vehicle-info">
+                                        <span class="vehicle-name">${vehicle.name}</span>
+                                        <span class="vehicle-condition">
+                                            ⛽${Math.round(vehicle.fuel)}% 🔧${Math.round(vehicle.condition)}%
+                                        </span>
+                                    </div>
+                                    <button class="assign-btn" data-vid="${vehicle.id}" data-rid="${route.id}">
+                                        Assign
+                                    </button>
                                 </div>
-                                <button class="assign-btn" data-vid="${vehicle.id}" data-rid="${route.id}">
-                                    Assign
-                                </button>
-                            </div>
-                        `).join('')}
+                            `).join('')}
+                        ` : '<p class="no-vehicles">No available vehicles. Purchase more or repair existing ones.</p>'}
                     </div>
-                ` : '<p class="no-vehicles">No available vehicles. Purchase more or repair existing ones.</p>'}
+                </div>
             </div>
         `;
         
@@ -506,25 +498,24 @@ export class DashboardUI {
 
     showRouteSelector(vehicleId) {
         console.log('Showing route selector for vehicle:', vehicleId);
-        
+
         const vehicle = this.game.managers.vehicle.getVehicleById(vehicleId);
         if (!vehicle) {
             this.showToast('Vehicle not found!', 'error');
             return;
         }
-        
+
         const routes = this.game.managers.route.getAllRoutes();
         const availableRoutes = routes.filter(route => {
-            // Filter routes that this vehicle can handle
             const vehicleType = this.game.managers.vehicle.getVehicleType(vehicle.typeId);
             return vehicleType && route.distance <= (vehicleType.maxDistance || 100);
         });
-        
+
         if (availableRoutes.length === 0) {
             this.showToast('No suitable routes available for this vehicle!', 'warning');
             return;
         }
-        
+
         const modalHTML = `
             <div class="route-selector-content">
                 <h3>🛣️ Select Route for ${vehicle.name}</h3>
@@ -556,7 +547,7 @@ export class DashboardUI {
                 </button>
             </div>
         `;
-        
+
         const modalDiv = document.createElement('div');
         modalDiv.className = 'modal-container route-selector-modal';
         modalDiv.innerHTML = modalHTML;
@@ -573,9 +564,8 @@ export class DashboardUI {
             z-index: 2500;
             padding: 20px;
         `;
-        
         document.body.appendChild(modalDiv);
-        
+
         // Add styles for the route selector if they don't exist
         if (!document.getElementById('route-selector-styles')) {
             const style = document.createElement('style');
@@ -592,13 +582,11 @@ export class DashboardUI {
                     color: var(--text-primary);
                     box-shadow: 0 8px 32px rgba(0,0,0,0.5);
                 }
-                
                 .route-selector-content h3 {
                     color: var(--primary-color);
                     margin-bottom: 1rem;
                     text-align: center;
                 }
-                
                 .vehicle-info-summary {
                     display: flex;
                     justify-content: space-around;
@@ -609,12 +597,10 @@ export class DashboardUI {
                     font-size: 0.9rem;
                     border: 1px solid var(--border-color);
                 }
-                
                 .routes-list {
                     max-height: 400px;
                     overflow-y: auto;
                 }
-                
                 .route-option {
                     background: rgba(255,255,255,0.05);
                     border: 1px solid var(--border-color);
@@ -623,24 +609,20 @@ export class DashboardUI {
                     margin-bottom: 1rem;
                     transition: all 0.2s ease;
                 }
-                
                 .route-option:hover {
                     background: rgba(255,255,255,0.1);
                     border-color: var(--primary-color);
                 }
-                
                 .route-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     margin-bottom: 0.5rem;
                 }
-                
                 .route-header h4 {
                     margin: 0;
                     color: var(--text-primary);
                 }
-                
                 .route-distance {
                     color: var(--primary-color);
                     font-weight: 600;
@@ -648,7 +630,6 @@ export class DashboardUI {
                     padding: 0.2rem 0.5rem;
                     border-radius: 4px;
                 }
-                
                 .route-details {
                     display: flex;
                     gap: 1rem;
@@ -656,7 +637,6 @@ export class DashboardUI {
                     font-size: 0.9rem;
                     color: var(--text-secondary);
                 }
-                
                 .select-route-btn {
                     width: 100%;
                     background: var(--secondary-color);
@@ -668,10 +648,20 @@ export class DashboardUI {
                     font-weight: 600;
                     transition: all 0.2s ease;
                 }
-                
                 .select-route-btn:hover {
                     background: #388e3c;
                     transform: translateY(-1px);
+                }
+                .cancel-btn {
+                    margin-top: 1rem;
+                    background: var(--danger-color, #f44336);
+                    color: white;
+                    border: none;
+                    padding: 0.8rem;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    width: 100%;
                 }
             `;
             document.head.appendChild(style);
@@ -681,20 +671,19 @@ export class DashboardUI {
     refuelVehicle(vehicleId) {
         const vehicle = this.game.managers.vehicle.getVehicleById(vehicleId);
         if (!vehicle) return;
-        
+
         const fuelNeeded = 100 - vehicle.fuel;
         const refuelCost = Math.round(fuelNeeded * 20);
-        
         if (fuelNeeded <= 0) {
             this.showToast('Vehicle fuel is already full!', 'info');
             return;
         }
-        
+
         if (this.game.managers.economy.spendCash(refuelCost)) {
             vehicle.fuel = 100;
             this.showToast(`${vehicle.name} refueled for Ksh ${refuelCost.toLocaleString()}!`, 'success');
             this.update();
-            
+
             if (this.game.components.driverMessages) {
                 this.game.components.driverMessages.showMessage(
                     vehicle.nickname || vehicle.name,
@@ -710,30 +699,26 @@ export class DashboardUI {
     repairVehicle(vehicleId) {
         const vehicle = this.game.managers.vehicle.getVehicleById(vehicleId);
         if (!vehicle) return;
-        
+
         const conditionNeeded = 100 - vehicle.condition;
         const repairCost = Math.round(conditionNeeded * 100);
-        
+
         if (conditionNeeded <= 0) {
             this.showToast('Vehicle is already in perfect condition!', 'info');
             return;
         }
-        
+
         if (this.game.managers.economy.spendCash(repairCost)) {
-            const oldCondition = vehicle.condition;
             vehicle.condition = 100;
-            
             if (vehicle.status === 'breakdown') {
                 vehicle.status = 'idle';
             }
-            
             this.showToast(`${vehicle.name} repaired for Ksh ${repairCost.toLocaleString()}!`, 'success');
             this.update();
-            
             if (this.game.components.driverMessages) {
                 this.game.components.driverMessages.showMessage(
                     vehicle.nickname || vehicle.name,
-                    `Feeling like new again! Condition improved from ${Math.round(oldCondition)}% to 100%!`,
+                    `Feeling like new again! Condition improved to 100%!`,
                     'positive'
                 );
             }
@@ -745,7 +730,7 @@ export class DashboardUI {
     editVehicleNickname(vehicleId) {
         const vehicle = this.game.managers.vehicle.getVehicleById(vehicleId);
         if (!vehicle) return;
-        
+
         const currentNickname = vehicle.nickname || this.generateDefaultNickname(vehicle.name);
         
         const modalHTML = `
@@ -768,9 +753,10 @@ export class DashboardUI {
                 </div>
             </div>
         `;
-        
+
         const modalDiv = document.createElement('div');
         modalDiv.className = 'modal-container';
+        modalDiv.innerHTML = modalHTML;
         modalDiv.style.cssText = `
             position: fixed;
             top: 0;
@@ -784,9 +770,8 @@ export class DashboardUI {
             z-index: 2000;
             padding: 20px;
         `;
-        modalDiv.innerHTML = modalHTML;
         document.body.appendChild(modalDiv);
-        
+
         setTimeout(() => {
             const input = document.getElementById('nickname-input');
             if (input) {
@@ -799,17 +784,17 @@ export class DashboardUI {
     saveVehicleNickname(vehicleId, nickname) {
         const vehicle = this.game.managers.vehicle.getVehicleById(vehicleId);
         if (!vehicle) return;
-        
+
         const cleanNickname = nickname.trim().substring(0, 8);
         if (cleanNickname.length === 0) {
             this.showToast('Nickname cannot be empty!', 'error');
             return;
         }
-        
+
         vehicle.nickname = cleanNickname;
         this.showToast(`Vehicle nickname updated to "${cleanNickname}"!`, 'success');
         this.update();
-        
+
         if (this.game.components.map) {
             this.game.components.map.updateVehiclePositions();
         }
@@ -818,16 +803,16 @@ export class DashboardUI {
     sellVehicle(vehicleId) {
         const vehicle = this.game.managers.vehicle.getVehicleById(vehicleId);
         if (!vehicle) return;
-        
+
         const vehicleType = this.game.managers.vehicle.getVehicleType(vehicle.typeId);
         const sellValue = vehicleType ? Math.round(vehicleType.cost * 0.6) : 1000;
-        
+
         const allVehicles = this.game.managers.vehicle.getVehicles();
         if (allVehicles.length <= 1) {
             this.showToast('Cannot sell your last vehicle! You need at least one matatu to run your business.', 'error');
             return;
         }
-        
+
         if (confirm(`Sell ${vehicle.name} for Ksh ${sellValue.toLocaleString()}? This action cannot be undone.`)) {
             if (vehicle.routeId) {
                 this.game.unassignVehicleFromRoute(vehicleId, vehicle.routeId);
@@ -835,7 +820,6 @@ export class DashboardUI {
             
             this.game.managers.economy.addCash(sellValue);
             this.game.managers.vehicle.removeVehicle(vehicleId);
-            
             this.showToast(`Sold ${vehicle.name} for Ksh ${sellValue.toLocaleString()}!`, 'success');
             this.update();
             
@@ -868,33 +852,28 @@ export class DashboardUI {
     updateStats() {
         const vehicles = this.game.managers.vehicle.getVehicles();
         const activeVehicles = vehicles.filter(v => v.status === 'running').length;
-        
         const cashElement = document.getElementById('cash-display');
         if (cashElement) {
             cashElement.textContent = `Ksh ${this.game.managers.economy.getPlayerState().cash.toLocaleString()}`;
         }
-        
         const reputationElement = document.getElementById('reputation-display');
         if (reputationElement) {
             reputationElement.textContent = `${this.game.managers.economy.getPlayerState().reputation}/100`;
         }
-        
         const dailyProfitElement = document.getElementById('daily-profit');
         if (dailyProfitElement) {
             dailyProfitElement.textContent = `Ksh ${this.game.managers.economy.getPlayerState().dailyProfit.toLocaleString()}`;
         }
-        
         const totalEarningsElement = document.getElementById('total-earnings');
         if (totalEarningsElement) {
             totalEarningsElement.textContent = `Ksh ${this.game.managers.economy.getPlayerState().totalEarningsAllTime.toLocaleString()}`;
         }
-        
         const activeVehiclesElement = document.getElementById('active-vehicles');
         if (activeVehiclesElement) {
             activeVehiclesElement.textContent = `${activeVehicles}/${vehicles.length}`;
         }
     }
-
+        
     showToast(message, type = 'info') {
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
@@ -906,7 +885,6 @@ export class DashboardUI {
             warning: '#ff9800',
             info: '#2196F3'
         };
-        
         toast.style.cssText = `
             position: fixed;
             top: 20px;
@@ -925,7 +903,7 @@ export class DashboardUI {
             font-weight: 500;
             border: 1px solid rgba(255,255,255,0.2);
         `;
-        
+
         // Responsive positioning for mobile
         if (window.innerWidth <= 768) {
             toast.style.cssText += `
@@ -938,10 +916,10 @@ export class DashboardUI {
                 text-align: center;
             `;
         }
-        
+
         document.body.appendChild(toast);
         setTimeout(() => toast.style.opacity = '1', 10);
-        
+
         setTimeout(() => {
             toast.style.opacity = '0';
             setTimeout(() => {
@@ -954,11 +932,11 @@ export class DashboardUI {
 
     update() {
         if (!this.game || !this.game.isInitialized) return;
-        
+
         try {
             this.updateStats();
             this.updateFleet();
-            
+
             // Update route details if open
             if (this.routeDetailsContainer && !this.routeDetailsContainer.classList.contains('hidden')) {
                 // Find current route and refresh details
