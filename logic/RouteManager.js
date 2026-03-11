@@ -96,6 +96,10 @@ export class RouteManager {
         return [...(this.routes || []), ...(this.customRoutes || [])];
     }
 
+    getAllRoutes() {
+        return this.getRoutes();
+    }
+
     getRouteById(id) {
         // Check standard routes first
         let route = (this.routes || []).find(r => r && r.id === id);

@@ -10,14 +10,13 @@ function setupOrientationHandling() {
         const isMobile = window.innerWidth <= 768;
         const isPortrait = window.innerHeight > window.innerWidth;
         
-        // Only show orientation lock on mobile devices in portrait mode
         if (isMobile && isPortrait) {
             orientationLock.style.display = 'flex';
             gameContainer.style.display = 'none';
             document.body.classList.add('mobile-portrait');
         } else {
             orientationLock.style.display = 'none';
-            gameContainer.style.display = 'flex';
+            gameContainer.style.display = 'grid';
             document.body.classList.remove('mobile-portrait');
         }
     }
@@ -51,6 +50,7 @@ import { MapUI } from './components/MapUI.js';
 import { EventPopupUI } from './components/EventPopupUI.js';
 import { DriverMessages } from './components/DriverMessages.js';
 import { WelcomeModal } from './components/WelcomeModal.js';
+import { ProgressionManager } from './logic/ProgressionManager.js';
 
 class Game {
     constructor() {
@@ -60,7 +60,21 @@ class Game {
                 reputation: 50,
                 dailyProfit: 0,
                 totalEarningsAllTime: 0,
-                businessStartDate: Date.now()
+                businessStartDate: Date.now(),
+                level: 1,
+                empireXP: 0,
+                unlockedRewardIds: [],
+                activeContracts: [],
+                contractBatch: 1,
+                progressionStats: {
+                    vehiclesPurchased: 0,
+                    routeSeconds: 0,
+                    dispatchCount: 0,
+                    driversHired: 0,
+                    fuelSpend: 0,
+                    repairSpend: 0,
+                    contractsDiscarded: 0
+                }
             },
             vehicles: [],
             nextVehicleId: 1,
@@ -74,6 +88,9 @@ class Game {
         this.components = {};
         this.isInitialized = false;
         this.lastTime = 0;
+        this.deferredInstallPrompt = null;
+        this.installButton = null;
+        this.pwaSetupDone = false;
     }
 
     async init() {
@@ -99,6 +116,7 @@ class Game {
             // Initialize components after managers are ready
             this.initializeComponents();
             this.setupEventListeners();
+            this.setupPWA();
             this.startGameSystems();
             
             console.log('✅ Game initialization complete!');
@@ -136,6 +154,7 @@ class Game {
         this.managers.economy = new Economy(this.gameState.player);
         this.managers.weather = new WeatherManager(this);
         this.managers.event = new EventManager(this);
+        this.managers.progression = new ProgressionManager(this);
         
         // Wait for async loading to complete
         await Promise.all([
@@ -196,13 +215,6 @@ class Game {
     }
 
     setupEventListeners() {
-        // Game controls
-        const saveBtn = document.getElementById('save-game');
-        const resetBtn = document.getElementById('reset-game');
-        
-        if (saveBtn) saveBtn.addEventListener('click', () => this.saveGame());
-        if (resetBtn) resetBtn.addEventListener('click', () => this.resetGame());
-        
         // Error handling
         window.addEventListener('error', (e) => {
             console.error('Global error:', e.error);
@@ -212,7 +224,178 @@ class Game {
         console.log('✅ Event listeners setup');
     }
 
+    setupPWA() {
+        if (this.pwaSetupDone) {
+            this.updateInstallButtonState();
+            return;
+        }
+
+        this.pwaSetupDone = true;
+        this.installButton = document.getElementById('install-app');
+
+        if (this.installButton) {
+            this.installButton.addEventListener('click', () => this.promptInstall());
+        }
+
+        window.addEventListener('beforeinstallprompt', (event) => {
+            event.preventDefault();
+            this.deferredInstallPrompt = event;
+            this.updateInstallButtonState();
+            this.components.dashboard?.showToast('Install is ready from the control bar.', 'info');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            this.deferredInstallPrompt = null;
+            this.updateInstallButtonState();
+            this.components.dashboard?.showToast('Matatu Empire installed successfully.', 'success');
+        });
+
+        const standaloneMedia = window.matchMedia('(display-mode: standalone)');
+        const updateInstallState = () => this.updateInstallButtonState();
+        if (typeof standaloneMedia.addEventListener === 'function') {
+            standaloneMedia.addEventListener('change', updateInstallState);
+        } else if (typeof standaloneMedia.addListener === 'function') {
+            standaloneMedia.addListener(updateInstallState);
+        }
+
+        if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('✅ Service worker registered'))
+                .catch(error => console.error('Service worker registration failed:', error));
+        }
+
+        this.updateInstallButtonState();
+    }
+
+    updateInstallButtonState() {
+        this.installButton = this.installButton || document.getElementById('install-app');
+        if (!this.installButton) return;
+
+        this.installButton.classList.remove('hidden', 'is-installed');
+        this.installButton.disabled = false;
+
+        if (this.isStandaloneDisplay()) {
+            this.installButton.textContent = '✅ Installed';
+            this.installButton.disabled = true;
+            this.installButton.classList.add('is-installed');
+            return;
+        }
+
+        if (this.deferredInstallPrompt) {
+            this.installButton.textContent = '⬇️ Install';
+            return;
+        }
+
+        if (this.isAppleMobile()) {
+            this.installButton.textContent = '📲 Add to Home';
+            return;
+        }
+
+        if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+            this.installButton.textContent = '🧭 Install Help';
+            return;
+        }
+
+        this.installButton.classList.add('hidden');
+    }
+
+    isStandaloneDisplay() {
+        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    isAppleMobile() {
+        const platform = navigator.platform || '';
+        return /iPad|iPhone|iPod/.test(navigator.userAgent) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    async promptInstall() {
+        if (this.isStandaloneDisplay()) {
+            this.components.dashboard?.showToast('Matatu Empire is already installed on this device.', 'info');
+            return;
+        }
+
+        if (this.deferredInstallPrompt) {
+            const installPrompt = this.deferredInstallPrompt;
+            this.deferredInstallPrompt = null;
+
+            try {
+                await installPrompt.prompt();
+                await installPrompt.userChoice;
+            } catch (error) {
+                console.error('Install prompt failed:', error);
+            }
+
+            this.updateInstallButtonState();
+            return;
+        }
+
+        this.showInstallGuide();
+    }
+
+    showInstallGuide() {
+        const dashboard = this.components.dashboard;
+        if (!dashboard?.createModal) {
+            this.components.dashboard?.showToast('Use your browser menu to install or add the app to your home screen.', 'info');
+            return;
+        }
+
+        const { title, description, steps, note } = this.getInstallGuide();
+        const modal = dashboard.createModal(`
+            <div class="install-modal-content glass-card">
+                <h3>${title}</h3>
+                <p>${description}</p>
+                <ol class="install-steps">
+                    ${steps.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+                <p class="install-note">${note}</p>
+                <div class="modal-actions">
+                    <button class="cancel-btn" data-action="close-modal">Close</button>
+                </div>
+            </div>
+        `, 'install-modal');
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal || event.target.closest('[data-action="close-modal"]')) {
+                modal.remove();
+            }
+        });
+    }
+
+    getInstallGuide() {
+        if (this.isAppleMobile()) {
+            return {
+                title: 'Add Matatu Empire to Home Screen',
+                description: 'iPhone and iPad install flows are manual, but the game is now configured for full-screen launch and offline caching.',
+                steps: [
+                    'Open the Share menu in Safari.',
+                    'Choose "Add to Home Screen".',
+                    'Confirm the title, then tap "Add".'
+                ],
+                note: 'Launching from the home screen gives you the closest native-app experience on iOS.'
+            };
+        }
+
+        return {
+            title: 'Install Matatu Empire',
+            description: 'Your browser can install this game as a standalone app with offline support after the first visit.',
+            steps: [
+                'Open the browser menu or address bar install control.',
+                'Choose "Install App" or "Add to Home Screen".',
+                'Confirm the install prompt to pin the game on this device.'
+            ],
+            note: 'If the install prompt is not visible yet, reload once after the service worker finishes caching the game shell.'
+        };
+    }
+
     startGameSystems() {
+        if (this.managers.weather) {
+            this.managers.weather.init();
+        }
+
+        if (this.managers.progression) {
+            this.managers.progression.startSession();
+        }
+
         // Start game loop
         this.startGameLoop();
         
@@ -234,6 +417,7 @@ class Game {
     get economy() { return this.managers.economy; }
     get weatherManager() { return this.managers.weather; }
     get eventManager() { return this.managers.event; }
+    get progressionManager() { return this.managers.progression; }
     get dashboardUI() { return this.components.dashboard; }
     get driverMessages() { return this.components.driverMessages; }
     get eventPopupUI() { return this.components.eventPopup; }
@@ -268,9 +452,11 @@ class Game {
         try {
             const vehicles = this.managers.vehicle.getVehicles();
             let hasUpdates = false;
+            let runningVehicles = 0;
             
             vehicles.forEach(vehicle => {
                 if (vehicle.status === 'running' && vehicle.routeId) {
+                    runningVehicles += 1;
                     const route = this.managers.route.getRouteById(vehicle.routeId);
                     if (route) {
                         const { profit, fuelConsumed, conditionWear } = this.managers.economy.calculateTick(vehicle, route, 1);
@@ -280,6 +466,9 @@ class Game {
                         if (updatedVehicle && updatedVehicle.status === 'running') {
                             this.managers.economy.addCash(profit);
                             this.managers.economy.updateDailyProfit(profit);
+                            if (this.managers.progression && profit > 0) {
+                                this.managers.progression.addXp(Math.max(4, Math.round(profit / 80)), '', true);
+                            }
                             hasUpdates = true;
                         } else if (updatedVehicle && updatedVehicle.status !== 'running') {
                             // Handle breakdown
@@ -295,6 +484,10 @@ class Game {
                     }
                 }
             });
+
+            if (this.managers.progression && runningVehicles > 0) {
+                this.managers.progression.recordRouteTime(runningVehicles);
+            }
             
             // Update systems
             if (this.managers.weather) {
@@ -308,8 +501,15 @@ class Game {
             // Only update UI if there were actual changes
             if (hasUpdates) {
                 if (this.components.dashboard) {
-                    this.components.dashboard.update();
+                    const progressionChanged = this.managers.progression ? this.managers.progression.evaluateProgress() : false;
+                    if (progressionChanged) {
+                        this.components.dashboard.update();
+                    } else {
+                        this.components.dashboard.refreshLiveData();
+                    }
                 }
+            } else if (runningVehicles > 0 && this.components.dashboard) {
+                this.components.dashboard.refreshLiveData();
             }
             
             // Always update map and driver messages (they have their own throttling)
@@ -329,10 +529,35 @@ class Game {
         try {
             const vehicle = this.managers.vehicle.getVehicleById(vehicleId);
             const route = this.managers.route.getRouteById(routeId);
+            const vehicleType = vehicle ? this.managers.vehicle.getVehicleType(vehicle.typeId) : null;
             
-            if (!vehicle || !route) {
+            if (!vehicle || !route || !vehicleType) {
                 console.error('Vehicle or route not found');
                 return;
+            }
+
+            if ((vehicleType.maxDistance || 100) < route.distance) {
+                this.components.dashboard?.showToast(`${vehicle.name} cannot handle ${route.distance} km routes.`, 'error');
+                return;
+            }
+
+            if (!vehicle.driver?.name) {
+                this.components.dashboard?.showToast(`${vehicle.name} needs a hired driver before dispatch.`, 'warning');
+                return;
+            }
+
+            if (vehicle.fuel <= 10) {
+                this.components.dashboard?.showToast(`${vehicle.name} needs refueling before dispatch.`, 'warning');
+                return;
+            }
+
+            if (vehicle.condition <= 25 || vehicle.status === 'breakdown') {
+                this.components.dashboard?.showToast(`${vehicle.name} needs repairs before dispatch.`, 'warning');
+                return;
+            }
+
+            if (vehicle.routeId && vehicle.routeId !== routeId) {
+                this.unassignVehicleFromRoute(vehicle.id, vehicle.routeId, true);
             }
             
             // Update vehicle
@@ -340,16 +565,19 @@ class Game {
             vehicle.status = 'running';
             
             // Update route
-            if (!route.assignedVehicles) {
-                route.assignedVehicles = [];
-            }
-            if (!route.assignedVehicles.includes(vehicleId)) {
-                route.assignedVehicles.push(vehicleId);
+            this.managers.route.assignVehicleToRoute(vehicleId, routeId);
+
+            if (this.managers.progression) {
+                this.managers.progression.recordDispatch();
             }
             
             if (this.components.dashboard) {
                 this.components.dashboard.showToast(`${vehicle.name} assigned to ${route.name}`, 'success');
                 this.components.dashboard.update();
+            }
+
+            if (this.components.map) {
+                this.components.map.updateVehiclePositions();
             }
             
             console.log(`✅ Vehicle ${vehicleId} assigned to route ${routeId}`);
@@ -358,10 +586,9 @@ class Game {
         }
     }
 
-    unassignVehicleFromRoute(vehicleId, routeId) {
+    unassignVehicleFromRoute(vehicleId, routeId, silent = false) {
         try {
             const vehicle = this.managers.vehicle.getVehicleById(vehicleId);
-            const route = this.managers.route.getRouteById(routeId);
             
             if (!vehicle) {
                 console.error('Vehicle not found');
@@ -370,16 +597,20 @@ class Game {
             
             // Update vehicle
             vehicle.routeId = null;
-            vehicle.status = 'idle';
-            
-            // Update route
-            if (route && route.assignedVehicles) {
-                route.assignedVehicles = route.assignedVehicles.filter(id => id !== vehicleId);
+            if (vehicle.status === 'running') {
+                vehicle.status = 'idle';
             }
             
-            if (this.components.dashboard) {
+            // Update route
+            this.managers.route.unassignVehicleFromRoute(vehicleId, routeId);
+            
+            if (this.components.dashboard && !silent) {
                 this.components.dashboard.showToast(`${vehicle.name} unassigned from route`, 'info');
                 this.components.dashboard.update();
+            }
+
+            if (this.components.map) {
+                this.components.map.updateVehiclePositions();
             }
             
             console.log(`✅ Vehicle ${vehicleId} unassigned from route`);
@@ -423,6 +654,25 @@ class Game {
                     dailyProfit: data.player?.dailyProfit || 0,
                     totalEarningsAllTime: data.player?.totalEarningsAllTime || 0,
                     businessStartDate: data.player?.businessStartDate || Date.now(),
+                    level: data.player?.level || 1,
+                    empireXP: data.player?.empireXP || 0,
+                    unlockedRewardIds: data.player?.unlockedRewardIds || [],
+                    activeContracts: data.player?.activeContracts || [],
+                    contractBatch: data.player?.contractBatch || 1,
+                    lastContractRefresh: data.player?.lastContractRefresh || '',
+                    lastDailyRewardKey: data.player?.lastDailyRewardKey || '',
+                    lastActiveDayKey: data.player?.lastActiveDayKey || '',
+                    highestCash: data.player?.highestCash || 0,
+                    highestReputation: data.player?.highestReputation || 50,
+                    progressionStats: data.player?.progressionStats || {
+                        vehiclesPurchased: 0,
+                        routeSeconds: 0,
+                        dispatchCount: 0,
+                        driversHired: 0,
+                        fuelSpend: 0,
+                        repairSpend: 0,
+                        contractsDiscarded: 0
+                    }
                 };
                 
                 // Load vehicles and ensure they have nicknames
@@ -441,6 +691,7 @@ class Game {
                 this.managers.vehicle.initializeVehicles(this.gameState.vehicles);
                 this.managers.vehicle.nextVehicleId = this.gameState.nextVehicleId;
                 this.managers.route.initializeCustomRoutes(this.gameState.customRoutes);
+                this.managers.progression?.initializePlayerState();
                 
                 console.log('Game loaded successfully with vehicle nicknames:', {
                     cash: this.gameState.player.cash,
@@ -469,6 +720,20 @@ class Game {
                 dailyProfit: 0,
                 totalEarningsAllTime: 0,
                 businessStartDate: Date.now(),
+                level: 1,
+                empireXP: 0,
+                unlockedRewardIds: [],
+                activeContracts: [],
+                contractBatch: 1,
+                progressionStats: {
+                    vehiclesPurchased: 0,
+                    routeSeconds: 0,
+                    dispatchCount: 0,
+                    driversHired: 1,
+                    fuelSpend: 0,
+                    repairSpend: 0,
+                    contractsDiscarded: 0
+                }
             },
             vehicles: [],
             nextVehicleId: 1,
@@ -487,7 +752,12 @@ class Game {
             routeId: null,
             status: 'idle',
             passengers: 0,
-            totalEarnings: 0
+            totalEarnings: 0,
+            driver: this.managers.vehicle?.createDriverProfile('Old Reliable', {
+                name: 'Amani Okello',
+                experience: 4,
+                salaryPerHour: 260
+            }) || null
         };
         
         this.gameState.vehicles.push(startingVehicle);
@@ -504,6 +774,10 @@ class Game {
         
         if (this.managers.route) {
             this.managers.route.initializeCustomRoutes(this.gameState.customRoutes);
+        }
+
+        if (this.managers.progression) {
+            this.managers.progression.initializePlayerState();
         }
         
         console.log("✅ New game initialized with starting vehicle:", startingVehicle);

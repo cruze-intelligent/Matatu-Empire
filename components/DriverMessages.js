@@ -90,7 +90,7 @@ export class DriverMessages {
             
             const message = this.generateRandomMessage(vehicle, route);
             if (message) {
-                this.showMessage(vehicle.name, message.text, message.type);
+                this.showMessage(vehicle.driver?.name || vehicle.name, message.text, message.type);
                 this.lastMessageTime = now;
             }
         }

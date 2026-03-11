@@ -88,6 +88,13 @@ header h1 {
     margin: 0 !important;
 }
 
+.header-subtitle {
+    margin-top: 0.2rem !important;
+    color: rgba(0, 0, 0, 0.72) !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+}
+
 .logo {
     font-size: clamp(1.5rem, 4vw, 3rem) !important;
     filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3)) !important;
@@ -101,6 +108,21 @@ header h1 {
     padding: 1.5rem !important;
     margin: 0 1rem 1rem 1rem !important;
     box-shadow: var(--shadow) !important;
+}
+
+#progression-container {
+    background: linear-gradient(135deg, var(--bg-light), var(--bg-dark)) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    margin: 0 1rem 1rem 1rem !important;
+    box-shadow: var(--shadow) !important;
+}
+
+#progression-container h2 {
+    color: var(--primary-color) !important;
+    margin-bottom: 1rem !important;
+    font-size: clamp(1.2rem, 3vw, 1.5rem) !important;
 }
 
 #dashboard-container h2 {
@@ -365,10 +387,11 @@ header h1 {
     transition: all 0.2s ease !important;
     text-transform: uppercase !important;
     letter-spacing: 0.3px !important;
-    white-space: nowrap !important;
+    white-space: normal !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     user-select: none !important;
+    min-height: 44px !important;
 }
 
 /* Buy Vehicle Button */
@@ -400,9 +423,14 @@ header h1 {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     gap: 0.5rem !important;
-    margin: 1rem !important;
-    padding-top: 1rem !important;
-    border-top: 1px solid var(--border-color) !important;
+    margin: 0 1rem 1rem 1rem !important;
+    padding: 0.9rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)) !important;
+    box-shadow: var(--shadow) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
 }
 
 .game-controls button {
@@ -917,20 +945,29 @@ header h1 {
     }
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 768px) and (orientation: portrait) {
     #game-container {
         grid-template-columns: 1fr !important;
-        grid-template-rows: auto 1fr !important;
-        height: 100vh !important;
+        grid-template-rows: minmax(260px, 42svh) auto !important;
+        min-height: 100vh !important;
+        height: auto !important;
     }
-    #main-panel, #dashboard-container, #fleet-container {
-        margin: 0 !important;
-        border-radius: 0 !important;
+    #main-panel {
+        order: 2 !important;
+        padding: 0.8rem !important;
+    }
+    #dashboard-container, #progression-container, #fleet-container {
+        margin: 0 0 0.8rem 0 !important;
+        border-radius: 14px !important;
         padding: 1rem !important;
     }
+    #map-area {
+        order: 1 !important;
+    }
     #map-area, #map-container {
-        min-height: 300px !important;
-        height: 300px !important;
+        min-height: 260px !important;
+        height: 42svh !important;
+        border-left: none !important;
     }
     .modal-container {
         align-items: flex-start !important;
@@ -944,6 +981,11 @@ header h1 {
     .vehicle-item {
         flex-direction: column !important;
         gap: 0.5rem !important;
+    }
+    .developer-footer {
+        margin: 0.5rem 0 0 !important;
+        padding: 1rem !important;
+        text-align: center !important;
     }
 }
 
@@ -1254,11 +1296,10 @@ header h1 {
 #orientation-lock {
     display: none !important;
     position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
+    inset: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    background: linear-gradient(135deg, var(--bg-dark), #1a1a1a) !important;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.98), rgba(45, 45, 45, 0.98)) !important;
     color: var(--text-primary) !important;
     z-index: 9999 !important;
     flex-direction: column !important;
@@ -1273,7 +1314,7 @@ header h1 {
     #orientation-lock {
         display: flex !important;
     }
-    
+
     #game-container {
         display: none !important;
     }
@@ -1324,6 +1365,457 @@ header h1 {
     background: #2e7d32;
 }
 
+.refuel-btn {
+    background: var(--info-color) !important;
+    color: #fff !important;
+}
+
+.refuel-btn:hover {
+    background: #1976d2 !important;
+}
+
+.nickname-btn {
+    background: rgba(255, 193, 7, 0.18) !important;
+    color: var(--primary-color) !important;
+    border: 1px solid rgba(255, 193, 7, 0.35) !important;
+}
+
+.nickname-btn:hover {
+    background: rgba(255, 193, 7, 0.28) !important;
+}
+
+.sell-btn {
+    background: rgba(244, 67, 54, 0.15) !important;
+    color: #ff8a80 !important;
+    border: 1px solid rgba(244, 67, 54, 0.35) !important;
+}
+
+.sell-btn:hover {
+    background: rgba(244, 67, 54, 0.25) !important;
+}
+
+.buy-vehicle-summary {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+    gap: 0.8rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.buy-vehicle-summary-card {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px !important;
+    padding: 0.9rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+}
+
+.summary-label {
+    color: var(--text-secondary) !important;
+    font-size: 0.78rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+}
+
+.summary-copy {
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
+}
+
+.vehicle-type-copy {
+    color: var(--text-secondary) !important;
+    margin-top: 0.35rem !important;
+    font-size: 0.92rem !important;
+}
+
+.compact-stats {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 0.5rem 1rem !important;
+}
+
+.progression-shell {
+    display: grid !important;
+    gap: 1rem !important;
+}
+
+.progression-summary {
+    display: grid !important;
+    grid-template-columns: minmax(180px, 1.1fr) minmax(0, 1fr) !important;
+    gap: 1rem !important;
+}
+
+.level-card,
+.ops-mini-card,
+.contract-card,
+.milestone-card {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+}
+
+.level-card {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.35rem !important;
+}
+
+.level-card strong,
+.ops-mini-card strong {
+    color: var(--primary-color) !important;
+    font-size: 1.2rem !important;
+}
+
+.ops-mini-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.8rem !important;
+}
+
+.ops-mini-card {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.3rem !important;
+}
+
+.progress-bar {
+    width: 100% !important;
+    height: 10px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    overflow: hidden !important;
+}
+
+.progress-bar.compact {
+    height: 8px !important;
+    margin: 0.7rem 0 !important;
+}
+
+.progress-bar span {
+    display: block !important;
+    height: 100% !important;
+    border-radius: inherit !important;
+    background: linear-gradient(90deg, var(--primary-color), #ff9800) !important;
+}
+
+.contract-list {
+    display: grid !important;
+    gap: 0.8rem !important;
+}
+
+.contract-card.completed {
+    border-color: rgba(76, 175, 80, 0.5) !important;
+    background: rgba(76, 175, 80, 0.08) !important;
+}
+
+.contract-card p,
+.milestone-card p {
+    color: var(--text-secondary) !important;
+    margin-top: 0.5rem !important;
+}
+
+.contract-card small,
+.milestone-card small {
+    color: var(--primary-color) !important;
+}
+
+.contract-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: baseline !important;
+    gap: 0.8rem !important;
+}
+
+.contract-header h3 {
+    margin: 0 !important;
+    color: var(--text-primary) !important;
+    font-size: 1rem !important;
+}
+
+.ad-slot {
+    width: calc(100% - 2rem) !important;
+    margin: 0 1rem 1rem 1rem !important;
+    padding: 0.8rem !important;
+    background: rgba(0, 0, 0, 0.28) !important;
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-radius: 12px !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.ad-slot iframe {
+    width: 100% !important;
+    min-height: 90px !important;
+    border-radius: 8px !important;
+}
+
+.developer-footer {
+    margin: 0 1rem 1rem 1rem !important;
+    padding: 1rem 1.2rem !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border-color) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+    font-size: 0.9rem !important;
+    color: var(--text-secondary) !important;
+}
+
+.developer-footer a,
+.welcome-brand-card a {
+    color: var(--primary-color) !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+}
+
+.welcome-shell {
+    position: relative !important;
+}
+
+.welcome-close {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+}
+
+.welcome-hero {
+    margin-bottom: 1.5rem !important;
+    padding-right: 2.5rem !important;
+}
+
+.welcome-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    padding: 0.4rem 0.8rem !important;
+    border-radius: 999px !important;
+    background: rgba(255, 193, 7, 0.12) !important;
+    color: var(--primary-color) !important;
+    margin-bottom: 0.8rem !important;
+    font-weight: 600 !important;
+}
+
+.welcome-hero h1 {
+    margin-bottom: 0.5rem !important;
+    color: var(--primary-color) !important;
+}
+
+.welcome-hero p,
+.welcome-tip {
+    color: var(--text-secondary) !important;
+}
+
+.welcome-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1rem !important;
+}
+
+.welcome-panel {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+}
+
+.welcome-panel h2 {
+    margin-bottom: 0.8rem !important;
+    text-align: left !important;
+}
+
+.welcome-checklist {
+    padding-left: 1.2rem !important;
+    list-style: decimal !important;
+    color: var(--text-secondary) !important;
+}
+
+.welcome-checklist li + li {
+    margin-top: 0.7rem !important;
+}
+
+.welcome-stats-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.8rem !important;
+}
+
+.welcome-stat-card,
+.welcome-brand-card {
+    background: rgba(0, 0, 0, 0.18) !important;
+    border-radius: 10px !important;
+    padding: 0.9rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.3rem !important;
+}
+
+.welcome-stat-card strong,
+.welcome-brand-card strong {
+    color: var(--text-primary) !important;
+}
+
+.welcome-actions {
+    margin-top: 1.5rem !important;
+    text-align: center !important;
+}
+
+.event-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.8rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.event-icon {
+    font-size: 2rem !important;
+}
+
+.event-description {
+    color: var(--text-secondary) !important;
+    margin-bottom: 1rem !important;
+}
+
+.route-copy {
+    color: var(--text-secondary) !important;
+    margin-top: 0.3rem !important;
+}
+
+.route-selector-content {
+    background: var(--bg-dark) !important;
+    border: 2px solid var(--primary-color) !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    max-width: min(90vw, 640px) !important;
+    max-height: 84vh !important;
+    overflow-y: auto !important;
+    color: var(--text-primary) !important;
+}
+
+.route-selector-content h3 {
+    color: var(--primary-color) !important;
+    margin-bottom: 1rem !important;
+    text-align: center !important;
+}
+
+.vehicle-info-summary {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.8rem !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px !important;
+    padding: 0.8rem !important;
+    margin-bottom: 1rem !important;
+    color: var(--text-secondary) !important;
+}
+
+.route-option {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px !important;
+    padding: 1rem !important;
+    margin-bottom: 0.8rem !important;
+}
+
+.route-option:hover {
+    border-color: rgba(255, 193, 7, 0.4) !important;
+}
+
+.route-distance {
+    color: var(--primary-color) !important;
+    font-weight: 700 !important;
+}
+
+.route-details {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.6rem 1rem !important;
+    color: var(--text-secondary) !important;
+    margin: 0.7rem 0 1rem 0 !important;
+    font-size: 0.9rem !important;
+}
+
+.select-route-btn {
+    width: 100% !important;
+    background: var(--secondary-color) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.9rem !important;
+    font-weight: 700 !important;
+}
+
+.select-route-btn:hover {
+    background: #388e3c !important;
+}
+
+.modal-choices {
+    display: grid !important;
+    gap: 0.8rem !important;
+}
+
+.choice-btn {
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px !important;
+    padding: 0.9rem !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-primary) !important;
+    text-align: left !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.3rem !important;
+}
+
+.choice-btn:hover {
+    border-color: rgba(255, 193, 7, 0.45) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.choice-cost-text {
+    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
+}
+
+@media only screen and (max-width: 768px) {
+    .progression-summary,
+    .welcome-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .ops-mini-grid,
+    .welcome-stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .developer-footer {
+        flex-direction: column !important;
+    }
+
+    .toast {
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        width: min(92vw, 360px) !important;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+    .ops-mini-grid,
+    .welcome-stats-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .contract-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+}
+
 .routes-list, .available-vehicles {
     max-height: 300px !important;
     overflow-y: auto !important;
@@ -1333,4 +1825,859 @@ header h1 {
 }
 .routes-list::-webkit-scrollbar, .available-vehicles::-webkit-scrollbar {
     width: 6px !important;
+}
+
+#route-market-container {
+    background: linear-gradient(135deg, rgba(45, 45, 45, 0.76), rgba(26, 26, 26, 0.78)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 16px !important;
+    padding: 1.5rem !important;
+    margin: 0 1rem 1rem 1rem !important;
+    box-shadow: var(--shadow) !important;
+}
+
+#route-market-container h2 {
+    color: var(--primary-color) !important;
+    margin-bottom: 1rem !important;
+    font-size: clamp(1.2rem, 3vw, 1.5rem) !important;
+}
+
+.glass-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22) !important;
+    backdrop-filter: blur(18px) saturate(130%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(130%) !important;
+}
+
+.glass-chip {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.vehicle-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04)) !important;
+    border-radius: 14px !important;
+}
+
+.vehicle-card:hover {
+    transform: translateY(-1px) !important;
+}
+
+.vehicle-driver-strip {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    padding: 0.85rem 1rem !important;
+    border-radius: 10px !important;
+    margin-bottom: 1rem !important;
+}
+
+.vehicle-driver-strip strong {
+    color: var(--text-primary) !important;
+    display: block !important;
+    margin-top: 0.2rem !important;
+}
+
+.driver-meta {
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
+    text-align: right !important;
+}
+
+.driver-btn {
+    background: rgba(33, 150, 243, 0.16) !important;
+    color: #8fd6ff !important;
+    border: 1px solid rgba(33, 150, 243, 0.28) !important;
+}
+
+.driver-btn:hover {
+    background: rgba(33, 150, 243, 0.24) !important;
+}
+
+.route-market-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+    gap: 1rem !important;
+}
+
+.route-market-card {
+    border-radius: 16px !important;
+    padding: 1rem !important;
+}
+
+.route-market-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    gap: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.route-market-header h3 {
+    margin: 0 0 0.25rem 0 !important;
+    color: var(--text-primary) !important;
+}
+
+.route-market-header p {
+    margin: 0 !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.9rem !important;
+}
+
+.route-rank {
+    min-width: 40px !important;
+    height: 40px !important;
+    border-radius: 999px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 193, 7, 0.18) !important;
+    color: var(--primary-color) !important;
+    font-weight: 700 !important;
+}
+
+.route-market-metrics {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.8rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.route-market-metrics div {
+    padding: 0.8rem !important;
+    border-radius: 10px !important;
+    background: rgba(0, 0, 0, 0.18) !important;
+}
+
+.route-market-metrics span {
+    display: block !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.78rem !important;
+    margin-bottom: 0.25rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+}
+
+.route-market-metrics strong {
+    color: var(--text-primary) !important;
+}
+
+.inspect-route-btn {
+    width: 100% !important;
+    padding: 0.9rem !important;
+    border: none !important;
+    border-radius: 10px !important;
+    background: rgba(255, 193, 7, 0.16) !important;
+    color: var(--primary-color) !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+.inspect-route-btn:hover {
+    background: rgba(255, 193, 7, 0.24) !important;
+}
+
+.ops-shell {
+    display: grid !important;
+    gap: 1rem !important;
+}
+
+.ops-hero {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding: 1.15rem !important;
+    border-radius: 18px !important;
+}
+
+.ops-level-panel {
+    display: grid !important;
+    gap: 0.35rem !important;
+}
+
+.ops-level-panel strong {
+    display: block !important;
+    font-size: 2rem !important;
+    color: var(--primary-color) !important;
+    margin: 0.25rem 0 !important;
+}
+
+.ops-level-panel p {
+    color: var(--text-secondary) !important;
+    margin-bottom: 0.8rem !important;
+}
+
+.progress-bar.large {
+    height: 12px !important;
+}
+
+.ops-status-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 0.8rem !important;
+}
+
+.ops-status-card {
+    border-radius: 14px !important;
+    padding: 0.95rem !important;
+    display: grid !important;
+    gap: 0.35rem !important;
+    min-height: 110px !important;
+}
+
+.ops-status-card strong {
+    color: var(--text-primary) !important;
+    font-size: 1.2rem !important;
+}
+
+.ops-status-card small {
+    color: var(--text-secondary) !important;
+}
+
+.ops-tracker-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.8rem !important;
+}
+
+.ops-tracker-card {
+    border-radius: 14px !important;
+    padding: 0.9rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+}
+
+.ops-tracker-card strong {
+    color: var(--text-primary) !important;
+    font-size: 1.25rem !important;
+}
+
+.ops-tracker-card small {
+    color: var(--text-secondary) !important;
+}
+
+.ops-columns {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+}
+
+.contract-board,
+.progress-board {
+    border-radius: 18px !important;
+    padding: 1.1rem !important;
+}
+
+.ops-panel-header {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+.ops-panel-header h3 {
+    margin: 0 0 0.25rem 0 !important;
+    color: var(--text-primary) !important;
+}
+
+.ops-panel-header p {
+    margin: 0 !important;
+    color: var(--text-secondary) !important;
+}
+
+.ops-count {
+    padding: 0.45rem 0.75rem !important;
+    border-radius: 999px !important;
+    background: rgba(255, 193, 7, 0.14) !important;
+    color: var(--primary-color) !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+}
+
+.contract-stack {
+    display: grid !important;
+    gap: 0.9rem !important;
+}
+
+.contract-card {
+    border-radius: 14px !important;
+    padding: 1rem !important;
+    display: grid !important;
+    gap: 0.75rem !important;
+}
+
+.contract-card.completed {
+    border-color: rgba(76, 175, 80, 0.35) !important;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.14), rgba(255, 255, 255, 0.03)) !important;
+}
+
+.contract-header {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 0.9rem !important;
+}
+
+.contract-copy {
+    display: grid !important;
+    gap: 0.2rem !important;
+}
+
+.contract-header h4 {
+    margin: 0 0 0.25rem 0 !important;
+    color: var(--text-primary) !important;
+}
+
+.contract-header p {
+    margin: 0 !important;
+    color: var(--text-secondary) !important;
+}
+
+.contract-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 0.6rem !important;
+    min-width: 100px !important;
+}
+
+.contract-meta span {
+    color: var(--text-primary) !important;
+    font-weight: 700 !important;
+}
+
+.contract-delete-btn {
+    border: none !important;
+    background: rgba(244, 67, 54, 0.18) !important;
+    color: #ff9b92 !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 0.7rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+.contract-delete-btn:hover {
+    background: rgba(244, 67, 54, 0.28) !important;
+}
+
+.contract-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.45rem 0.75rem !important;
+    border-radius: 999px !important;
+    background: rgba(76, 175, 80, 0.18) !important;
+    color: #9ef0a5 !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+}
+
+.contract-reward-copy {
+    color: var(--primary-color) !important;
+}
+
+.progress-board {
+    display: grid !important;
+    gap: 1rem !important;
+}
+
+.progress-focus-card {
+    border-radius: 16px !important;
+    padding: 1rem !important;
+}
+
+.progress-focus-card h4 {
+    margin: 0.25rem 0 0.35rem 0 !important;
+    color: var(--text-primary) !important;
+}
+
+.progress-focus-card p {
+    color: var(--text-secondary) !important;
+    margin: 0 !important;
+}
+
+.progress-focus-empty {
+    min-height: 0 !important;
+}
+
+.progress-tracker-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.8rem !important;
+}
+
+.progress-tracker-card {
+    border-radius: 14px !important;
+    padding: 0.95rem !important;
+    display: grid !important;
+    gap: 0.3rem !important;
+    min-height: 116px !important;
+}
+
+.progress-tracker-card strong {
+    color: var(--text-primary) !important;
+    font-size: 1.2rem !important;
+    line-height: 1.15 !important;
+}
+
+.progress-tracker-card small {
+    color: var(--text-secondary) !important;
+}
+
+.progress-footnote {
+    color: var(--text-secondary) !important;
+    font-size: 0.86rem !important;
+    line-height: 1.5 !important;
+    padding-top: 0.1rem !important;
+}
+
+.milestone-card {
+    border-radius: 14px !important;
+}
+
+.milestone-card h4 {
+    margin: 0 0 0.35rem 0 !important;
+    color: var(--text-primary) !important;
+}
+
+.milestone-progress {
+    color: var(--text-secondary) !important;
+    margin: 0.6rem 0 !important;
+}
+
+.driver-modal-content {
+    width: min(92vw, 540px) !important;
+    border-radius: 18px !important;
+    padding: 1.5rem !important;
+}
+
+.driver-modal-content h3 {
+    color: var(--primary-color) !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.driver-modal-content p {
+    color: var(--text-secondary) !important;
+    margin-bottom: 1rem !important;
+}
+
+.modal-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 1rem !important;
+}
+
+.danger-btn {
+    background: rgba(244, 67, 54, 0.18) !important;
+    color: #ff9b92 !important;
+    border: 1px solid rgba(244, 67, 54, 0.24) !important;
+    border-radius: 8px !important;
+    padding: 0.8rem 1rem !important;
+    cursor: pointer !important;
+    font-weight: 700 !important;
+}
+
+.danger-btn:hover {
+    background: rgba(244, 67, 54, 0.28) !important;
+}
+
+@media only screen and (max-width: 900px) {
+    .route-market-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    #route-market-container {
+        margin: 0 0 0.8rem 0 !important;
+        padding: 1rem !important;
+        border-radius: 14px !important;
+    }
+
+    .ops-status-grid,
+    .ops-tracker-grid,
+    .progress-tracker-grid,
+    .route-market-metrics,
+    .modal-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .vehicle-driver-strip,
+    .ops-panel-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+    }
+
+    .contract-meta {
+        align-items: flex-start !important;
+    }
+}
+
+@media only screen and (max-height: 560px) and (orientation: landscape) {
+    header {
+        padding: 0.8rem 1rem !important;
+        margin: -0.85rem -0.85rem 0.85rem -0.85rem !important;
+    }
+
+    #dashboard-container,
+    #route-market-container,
+    #progression-container,
+    #fleet-container,
+    .ad-slot,
+    .developer-footer,
+    .game-controls {
+        margin-left: 0.85rem !important;
+        margin-right: 0.85rem !important;
+    }
+
+    #dashboard-container,
+    #route-market-container,
+    #progression-container,
+    #fleet-container {
+        padding: 1rem !important;
+    }
+
+    #fleet-container {
+        min-height: 220px !important;
+    }
+
+    .vehicle-actions button,
+    .game-controls button {
+        min-height: 40px !important;
+        padding-top: 0.65rem !important;
+        padding-bottom: 0.65rem !important;
+    }
+}
+
+/* Modern Game Buttons */
+.game-controls {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+}
+
+:is(
+    #buy-matatu-btn,
+    #save-game,
+    #reset-game,
+    #install-app,
+    .create-route-btn,
+    .delete-route-btn,
+    .create-multi-route-btn,
+    .assign-btn,
+    .unassign-btn,
+    .inspect-route-btn,
+    .buy-vehicle-btn.enabled,
+    .cancel-btn,
+    .save-btn,
+    .repair-btn,
+    .refuel-btn,
+    .nickname-btn,
+    .sell-btn,
+    .driver-btn,
+    .select-route-btn,
+    .choice-btn,
+    .contract-delete-btn,
+    .danger-btn
+) {
+    --button-top: #243b53;
+    --button-bottom: #162434;
+    --button-text: #eef6ff;
+    --button-border: rgba(255, 255, 255, 0.14);
+    --button-shadow: rgba(7, 17, 29, 0.34);
+    appearance: none !important;
+    border: 1px solid var(--button-border) !important;
+    border-radius: 14px !important;
+    background: linear-gradient(180deg, var(--button-top), var(--button-bottom)) !important;
+    color: var(--button-text) !important;
+    box-shadow:
+        0 12px 26px var(--button-shadow) !important,
+        inset 0 1px 0 rgba(255, 255, 255, 0.22) !important,
+        inset 0 -1px 0 rgba(0, 0, 0, 0.28) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.22) !important;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        filter 0.18s ease,
+        background 0.18s ease !important;
+    isolation: isolate !important;
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+:is(
+    #buy-matatu-btn,
+    #save-game,
+    #reset-game,
+    #install-app,
+    .create-route-btn,
+    .delete-route-btn,
+    .create-multi-route-btn,
+    .assign-btn,
+    .unassign-btn,
+    .inspect-route-btn,
+    .buy-vehicle-btn.enabled,
+    .cancel-btn,
+    .save-btn,
+    .repair-btn,
+    .refuel-btn,
+    .nickname-btn,
+    .sell-btn,
+    .driver-btn,
+    .select-route-btn,
+    .choice-btn,
+    .contract-delete-btn,
+    .danger-btn
+)::before {
+    content: '' !important;
+    position: absolute !important;
+    inset: 1px !important;
+    border-radius: inherit !important;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 38%),
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.14), transparent 55%) !important;
+    opacity: 0.95 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+:is(
+    #buy-matatu-btn,
+    #save-game,
+    #reset-game,
+    #install-app,
+    .create-route-btn,
+    .delete-route-btn,
+    .create-multi-route-btn,
+    .assign-btn,
+    .unassign-btn,
+    .inspect-route-btn,
+    .buy-vehicle-btn.enabled,
+    .cancel-btn,
+    .save-btn,
+    .repair-btn,
+    .refuel-btn,
+    .nickname-btn,
+    .sell-btn,
+    .driver-btn,
+    .select-route-btn,
+    .choice-btn,
+    .contract-delete-btn,
+    .danger-btn
+):hover {
+    transform: translateY(-2px) scale(1.01) !important;
+    filter: saturate(1.08) brightness(1.04) !important;
+    box-shadow:
+        0 16px 32px var(--button-shadow) !important,
+        inset 0 1px 0 rgba(255, 255, 255, 0.24) !important,
+        inset 0 -1px 0 rgba(0, 0, 0, 0.24) !important;
+}
+
+:is(
+    #buy-matatu-btn,
+    #save-game,
+    #reset-game,
+    #install-app,
+    .create-route-btn,
+    .delete-route-btn,
+    .create-multi-route-btn,
+    .assign-btn,
+    .unassign-btn,
+    .inspect-route-btn,
+    .buy-vehicle-btn.enabled,
+    .cancel-btn,
+    .save-btn,
+    .repair-btn,
+    .refuel-btn,
+    .nickname-btn,
+    .sell-btn,
+    .driver-btn,
+    .select-route-btn,
+    .choice-btn,
+    .contract-delete-btn,
+    .danger-btn
+):active {
+    transform: translateY(1px) scale(0.995) !important;
+    box-shadow:
+        0 6px 16px var(--button-shadow) !important,
+        inset 0 2px 0 rgba(0, 0, 0, 0.2) !important;
+}
+
+:is(
+    #buy-matatu-btn,
+    #save-game,
+    #reset-game,
+    #install-app,
+    .create-route-btn,
+    .delete-route-btn,
+    .create-multi-route-btn,
+    .assign-btn,
+    .unassign-btn,
+    .inspect-route-btn,
+    .buy-vehicle-btn.enabled,
+    .cancel-btn,
+    .save-btn,
+    .repair-btn,
+    .refuel-btn,
+    .nickname-btn,
+    .sell-btn,
+    .driver-btn,
+    .select-route-btn,
+    .choice-btn,
+    .contract-delete-btn,
+    .danger-btn
+):focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.88) !important;
+    outline-offset: 2px !important;
+}
+
+:is(
+    #save-game,
+    .inspect-route-btn,
+    .refuel-btn,
+    .driver-btn,
+    .choice-btn.choice-chance
+) {
+    --button-top: #33b4ff;
+    --button-bottom: #1558c0;
+    --button-shadow: rgba(21, 88, 192, 0.32);
+}
+
+:is(
+    #buy-matatu-btn,
+    .assign-btn,
+    .repair-btn,
+    .save-btn,
+    .select-route-btn,
+    .buy-vehicle-btn.enabled,
+    .choice-btn.choice-bonus
+) {
+    --button-top: #3ad48a;
+    --button-bottom: #15704a;
+    --button-shadow: rgba(21, 112, 74, 0.34);
+}
+
+:is(
+    #reset-game,
+    .sell-btn,
+    .contract-delete-btn,
+    .danger-btn,
+    .choice-btn.choice-penalty
+) {
+    --button-top: #ff7c6f;
+    --button-bottom: #b12f2b;
+    --button-shadow: rgba(177, 47, 43, 0.34);
+}
+
+:is(
+    #install-app,
+    .nickname-btn,
+    .choice-btn.choice-cost
+) {
+    --button-top: #ffd659;
+    --button-bottom: #b98705;
+    --button-text: #1b1608;
+    --button-shadow: rgba(185, 135, 5, 0.32);
+}
+
+:is(
+    .cancel-btn,
+    .unassign-btn,
+    .create-route-btn,
+    .delete-route-btn,
+    .create-multi-route-btn
+) {
+    --button-top: #5d728b;
+    --button-bottom: #324458;
+    --button-shadow: rgba(50, 68, 88, 0.34);
+}
+
+#install-app.is-installed {
+    --button-top: #5a6472;
+    --button-bottom: #394552;
+    --button-text: #d8dee7;
+    opacity: 0.78 !important;
+    cursor: default !important;
+}
+
+.buy-vehicle-btn.disabled {
+    border-radius: 14px !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+}
+
+.route-close-btn {
+    background: linear-gradient(180deg, #ff7c6f, #b12f2b) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    box-shadow:
+        0 12px 24px rgba(177, 47, 43, 0.28) !important,
+        inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+}
+
+.route-close-btn:hover {
+    filter: brightness(1.06) !important;
+    box-shadow:
+        0 16px 28px rgba(177, 47, 43, 0.36) !important,
+        inset 0 1px 0 rgba(255, 255, 255, 0.24) !important;
+}
+
+.choice-btn {
+    min-height: 74px !important;
+    justify-content: center !important;
+}
+
+.contract-delete-btn,
+#install-app,
+#buy-matatu-btn,
+.inspect-route-btn,
+.select-route-btn,
+.buy-vehicle-btn {
+    letter-spacing: 0.04em !important;
+}
+
+.install-modal-content {
+    width: min(92vw, 520px) !important;
+    border-radius: 18px !important;
+    padding: 1.5rem !important;
+    display: grid !important;
+    gap: 0.9rem !important;
+}
+
+.install-modal-content h3 {
+    color: var(--primary-color) !important;
+    margin: 0 !important;
+}
+
+.install-modal-content p {
+    color: var(--text-secondary) !important;
+    margin: 0 !important;
+}
+
+.install-steps {
+    padding-left: 1.2rem !important;
+    list-style: decimal !important;
+    color: var(--text-primary) !important;
+    display: grid !important;
+    gap: 0.45rem !important;
+}
+
+.install-note {
+    font-size: 0.88rem !important;
+}
+
+@media only screen and (max-width: 768px) {
+    .game-controls {
+        grid-template-columns: 1fr !important;
+    }
+
+    #install-app,
+    #save-game,
+    #reset-game {
+        width: 100% !important;
+    }
 }

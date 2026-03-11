@@ -52,8 +52,7 @@ export class WeatherManager {
         const oldWeather = this.currentWeather;
         this.setRandomWeather();
         
-        // Always show popup when weather changes (for testing)
-        if (oldWeather !== this.currentWeather || true) { // Remove "|| true" after testing
+        if (oldWeather !== this.currentWeather) {
             console.log(`🌦️ Weather changing from ${oldWeather} to ${this.currentWeather}`);
             this.showWeatherChangePopup(oldWeather, this.currentWeather);
         }
@@ -103,9 +102,15 @@ export class WeatherManager {
             </div>
         `;
         
-        popup.innerHTML += `
-            <button class="cancel-btn" style="margin-top:1rem;" onclick="this.parentNode.remove()">Dismiss</button>
-        `;
+        const dismissButton = document.createElement('button');
+        dismissButton.className = 'cancel-btn';
+        dismissButton.style.marginTop = '1rem';
+        dismissButton.textContent = 'Dismiss';
+        dismissButton.addEventListener('click', (event) => {
+            event.stopPropagation();
+            popup.remove();
+        });
+        popup.appendChild(dismissButton);
 
         // Add click to dismiss
         popup.addEventListener('click', () => {

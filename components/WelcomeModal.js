@@ -2,164 +2,114 @@ export class WelcomeModal {
     constructor(game) {
         this.game = game;
         this.modal = document.getElementById('welcome-modal');
-        this.content = this.modal.querySelector('.modal-content');
+        this.content = this.modal?.querySelector('.modal-content');
         this.isNewPlayer = true;
-        
+
         this.tips = [
-            {
-                title: "💡 Route Management",
-                content: "Click on different routes to compare their profitability. Some routes earn more but may have higher fuel costs!",
-                icon: "🗺️"
-            },
-            {
-                title: "💡 Vehicle Maintenance", 
-                content: "Keep your vehicles above 70% condition. Poor condition means fewer passengers and higher fuel consumption!",
-                icon: "🔧"
-            },
-            {
-                title: "💡 Weather Strategies",
-                content: "Rainy weather brings more passengers but increases breakdown risk. Sunny days are perfect for long routes!",
-                icon: "🌦️"
-            },
-            {
-                title: "💡 Fleet Expansion",
-                content: "Buy different vehicle types strategically. Larger vehicles earn more but cost more to maintain!",
-                icon: "🚌"
-            },
-            {
-                title: "💡 Route Creation",
-                content: "Use the 'Create Route' button to build custom routes between city points for maximum profit!",
-                icon: "✏️"
-            },
-            {
-                title: "💡 Economic Strategy",
-                content: "Monitor your daily profit. If it's negative, consider unassigning vehicles from unprofitable routes!",
-                icon: "📊"
-            }
+            'Use route demand and risk together. High fares are not always the best long-term choice.',
+            'Keep at least one vehicle idle as backup once your fleet expands.',
+            'Custom routes are the fastest way to create a stronger profit edge.',
+            'Daily contracts refresh your goals and keep rewards flowing.',
+            'Repairing early is cheaper than losing a whole shift to a breakdown.'
         ];
+
+        if (this.modal) {
+            this.modal.addEventListener('click', (event) => {
+                if (event.target === this.modal) {
+                    this.hide();
+                    return;
+                }
+
+                const actionButton = event.target.closest('button[data-action]');
+                if (actionButton?.dataset.action === 'close-welcome') {
+                    this.hide();
+                }
+            });
+        }
     }
 
     show(isNewPlayer = true) {
+        if (!this.modal || !this.content) return;
         this.isNewPlayer = isNewPlayer;
         this.renderContent();
         this.modal.classList.remove('hidden');
     }
 
     hide() {
-        this.modal.classList.add('hidden');
+        if (this.modal) {
+            this.modal.classList.add('hidden');
+        }
     }
 
     renderContent() {
-        const randomTip = this.tips[Math.floor(Math.random() * this.tips.length)];
-        
-        this.content.innerHTML = `
-            <div style="position: relative;">
-                <button onclick="window.gameInstance.components.welcomeModal.hide()" 
-                        style="position: absolute; top: -10px; right: -10px; background: var(--danger-color); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 1.2rem; z-index: 10;">×</button>
-                
-                <div class="welcome-content">
-                    ${this.isNewPlayer ? this.renderNewPlayerContent() : this.renderReturningPlayerContent(randomTip)}
-                </div>
-            </div>
-        `;
-    }
-
-    renderNewPlayerContent() {
-        return `
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div style="font-size: 4rem; margin-bottom: 1rem;">🚌</div>
-                <h1 style="color: var(--primary-color); margin-bottom: 0.5rem; font-size: 2.2rem;">Welcome to Matatu Empire!</h1>
-                <p style="color: var(--text-secondary); font-size: 1.1rem;">Build your public transport empire in Kenya</p>
-            </div>
-
-            <div style="background: linear-gradient(135deg, var(--bg-light), var(--bg-dark)); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--border-color);">
-                <h2 style="color: var(--primary-color); margin-bottom: 1rem; text-align: center;">🚀 Quick Start Guide</h2>
-                <ol style="color: var(--text-primary); font-size: 1rem; line-height: 1.6; padding-left: 0; list-style: none; counter-reset: step-counter;">
-                    <li style="counter-increment: step-counter; margin-bottom: 1rem; padding-left: 2rem; position: relative;">
-                        <span style="position: absolute; left: 0; top: 0; background: var(--primary-color); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">1</span>
-                        <strong>🗺️ Choose a Route:</strong> Click on a route on the map to see its details
-                    </li>
-                    <li style="counter-increment: step-counter; margin-bottom: 1rem; padding-left: 2rem; position: relative;">
-                        <span style="position: absolute; left: 0; top: 0; background: var(--primary-color); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">2</span>
-                        <strong>✅ Assign Vehicle:</strong> Put "Old Reliable" to work on the route
-                    </li>
-                    <li style="counter-increment: step-counter; margin-bottom: 1rem; padding-left: 2rem; position: relative;">
-                        <span style="position: absolute; left: 0; top: 0; background: var(--primary-color); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">3</span>
-                        <strong>💰 Earn & Expand:</strong> Watch profits roll in and buy more vehicles
-                    </li>
-                    <li style="counter-increment: step-counter; margin-bottom: 0; padding-left: 2rem; position: relative;">
-                        <span style="position: absolute; left: 0; top: 0; background: var(--primary-color); color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">4</span>
-                        <strong>🏆 Build Empire:</strong> Create custom routes and dominate the city!
-                    </li>
-                </ol>
-            </div>
-
-            <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                <h3 style="color: var(--secondary-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span>💡</span> Pro Tip
-                </h3>
-                <p style="color: var(--text-secondary); margin: 0; line-height: 1.5;">
-                    Start with the <strong style="color: var(--primary-color);">Downtown > Industrial</strong> route - 
-                    it's profitable and has low risk, perfect for beginners!
-                </p>
-            </div>
-
-            <div style="text-align: center;">
-                <button onclick="window.gameInstance.components.welcomeModal.hide()" 
-                        style="background: var(--primary-color); color: var(--bg-dark); border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;">
-                    🚀 Start Building My Empire!
-                </button>
-            </div>
-        `;
-    }
-
-    renderReturningPlayerContent(tip) {
-        const playerState = this.game.managers.economy.getPlayerState();
+        const player = this.game.managers.economy.getPlayerState();
         const vehicles = this.game.managers.vehicle.getVehicles();
-        const activeVehicles = vehicles.filter(v => v.status === 'running').length;
-        
-        return `
-            <div style="text-align: center; margin-bottom: 2rem;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">🎉</div>
-                <h1 style="color: var(--primary-color); margin-bottom: 0.5rem;">Welcome Back, Boss!</h1>
-                <p style="color: var(--text-secondary);">Your matatu empire awaits your return</p>
-            </div>
+        const runningVehicles = vehicles.filter(vehicle => vehicle.status === 'running').length;
+        const featuredTip = this.tips[Math.floor(Math.random() * this.tips.length)];
 
-            <div style="background: linear-gradient(135deg, var(--bg-light), var(--bg-dark)); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; border: 1px solid var(--border-color);">
-                <h2 style="color: var(--primary-color); margin-bottom: 1rem; text-align: center;">📊 Empire Status</h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-                    <div style="text-align: center; padding: 0.8rem; background: rgba(255,255,255,0.1); border-radius: 6px;">
-                        <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">💰</div>
-                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Cash</div>
-                        <div style="color: var(--primary-color); font-weight: bold;">Ksh ${playerState.cash.toLocaleString()}</div>
-                    </div>
-                    <div style="text-align: center; padding: 0.8rem; background: rgba(255,255,255,0.1); border-radius: 6px;">
-                        <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">🚐</div>
-                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Fleet</div>
-                        <div style="color: var(--secondary-color); font-weight: bold;">${vehicles.length} vehicles</div>
-                    </div>
-                    <div style="text-align: center; padding: 0.8rem; background: rgba(255,255,255,0.1); border-radius: 6px;">
-                        <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">🏃</div>
-                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Active</div>
-                        <div style="color: var(--info-color); font-weight: bold;">${activeVehicles} running</div>
-                    </div>
+        this.content.innerHTML = `
+            <div class="welcome-shell">
+                <button class="route-close-btn welcome-close" data-action="close-welcome">×</button>
+                <div class="welcome-hero">
+                    <div class="welcome-badge">🚌 Matatu Empire</div>
+                    <h1>${this.isNewPlayer ? 'Build a Transport Empire' : 'Back to the Road'}</h1>
+                    <p>
+                        ${this.isNewPlayer
+                            ? 'Scale from one matatu into a resilient citywide transport operation.'
+                            : 'Your business is still active. Tighten operations, grow the fleet, and keep the contracts coming.'}
+                    </p>
                 </div>
-            </div>
 
-            <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-                <h3 style="color: var(--secondary-color); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span>${tip.icon}</span> ${tip.title}
-                </h3>
-                <p style="color: var(--text-secondary); margin: 0; line-height: 1.5;">
-                    ${tip.content}
-                </p>
-            </div>
+                <div class="welcome-grid">
+                    <section class="welcome-panel">
+                        <h2>${this.isNewPlayer ? 'Start Here' : 'Current Status'}</h2>
+                        ${this.isNewPlayer ? `
+                            <ol class="welcome-checklist">
+                                <li>Pick a route with strong demand and manageable risk.</li>
+                                <li>Dispatch your first vehicle, then watch fuel and condition closely.</li>
+                                <li>Use early profits to unlock more vehicles and custom routes.</li>
+                                <li>Complete Ops & Rewards contracts for cash, reputation, and XP.</li>
+                            </ol>
+                        ` : `
+                            <div class="welcome-stats-grid">
+                                <div class="welcome-stat-card">
+                                    <span>Cash</span>
+                                    <strong>Ksh ${player.cash.toLocaleString()}</strong>
+                                </div>
+                                <div class="welcome-stat-card">
+                                    <span>Fleet</span>
+                                    <strong>${vehicles.length} vehicles</strong>
+                                </div>
+                                <div class="welcome-stat-card">
+                                    <span>Active</span>
+                                    <strong>${runningVehicles} running</strong>
+                                </div>
+                                <div class="welcome-stat-card">
+                                    <span>Level</span>
+                                    <strong>Lv ${player.level || 1}</strong>
+                                </div>
+                            </div>
+                        `}
+                    </section>
 
-            <div style="text-align: center;">
-                <button onclick="window.gameInstance.components.welcomeModal.hide()" 
-                        style="background: var(--primary-color); color: var(--bg-dark); border: none; padding: 1rem 2rem; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: all 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px;">
-                    💼 Continue Managing Empire
-                </button>
+                    <section class="welcome-panel">
+                        <h2>Operational Tip</h2>
+                        <p class="welcome-tip">${featuredTip}</p>
+                        <div class="welcome-brand-card">
+                            <span class="summary-label">Built by</span>
+                            <strong>Cruze Intelligent Systems (U) LTD</strong>
+                            <a href="https://cruzeintelligentsystems.com" target="_blank" rel="noopener noreferrer">
+                                cruzeintelligentsystems.com
+                            </a>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="welcome-actions">
+                    <button class="save-btn" data-action="close-welcome">
+                        ${this.isNewPlayer ? 'Start Running Routes' : 'Continue Managing Empire'}
+                    </button>
+                </div>
             </div>
         `;
     }

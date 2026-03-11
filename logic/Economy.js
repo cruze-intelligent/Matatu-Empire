@@ -24,10 +24,22 @@ export class Economy {
             }
         }
 
+        const reputationBonus = 0.85 + ((this.player.reputation || 50) / 100) * 0.5;
+        const levelBonus = 1 + Math.min(((this.player.level || 1) - 1) * 0.02, 0.2);
+        const routeDemand = 0.7 + ((route.passengerFlow || 5) / 10) * 0.9;
+        const speedBonus = 0.85 + ((vehicleType.speed || 5) / 20);
+        const reliabilityBonus = 0.8 + ((vehicleType.reliability || 5) / 20);
+        const distanceFit = Math.max(0.75, 1 - ((route.distance || 10) / Math.max((vehicleType.maxDistance || 100) * 2, 1)));
+
         // Calculate passengers
         let passengerRate = this.basePassengerRate * weatherMultiplier;
-        passengerRate *= (vehicle.condition / 100); // Condition affects passenger attraction
-        passengerRate *= (vehicleType.capacity / 14); // Normalize by capacity
+        passengerRate *= (vehicle.condition / 100);
+        passengerRate *= (vehicleType.capacity / 14);
+        passengerRate *= reputationBonus;
+        passengerRate *= routeDemand;
+        passengerRate *= speedBonus;
+        passengerRate *= distanceFit;
+        passengerRate *= levelBonus;
         
         const passengers = Math.min(
             Math.floor(passengerRate * deltaTime * 10),
@@ -35,28 +47,35 @@ export class Economy {
         );
 
         // Calculate earnings
-        const farePerPassenger = route.fare || 50;
+        const farePerPassenger = (route.fare || 50) * (1 + Math.max(0, (this.player.reputation || 50) - 50) / 500);
         const revenue = passengers * farePerPassenger;
         
-        // Calculate fuel consumption - FIXED: Use let instead of const
+        // Calculate fuel consumption with route and vehicle fit.
         let fuelConsumed = this.baseFuelConsumption * fuelMultiplier * deltaTime;
-        fuelConsumed *= (1 + (vehicleType.capacity / 20)); // Larger vehicles use more fuel
-        fuelConsumed *= (1.5 - (vehicle.condition / 200)); // Poor condition increases fuel use
+        fuelConsumed *= (1 + (vehicleType.capacity / 20));
+        fuelConsumed *= (1.45 - (vehicle.condition / 220));
+        fuelConsumed *= (1.35 - ((vehicleType.fuelEfficiency || vehicleType.reliability || 5) / 20));
+        fuelConsumed *= (1 + ((route.distance || 10) / 90));
+        fuelConsumed *= (1 + ((route.risk || 3) / 30));
         
-        // Calculate condition wear - FIXED: Use let instead of const
+        // Calculate condition wear with route risk and reliability.
         let conditionWear = this.baseConditionWear * breakdownMultiplier * deltaTime;
-        conditionWear *= (1 + Math.random() * 0.5); // Random wear variation
-        conditionWear *= (1 + (vehicleType.capacity / 30)); // Larger vehicles wear faster
+        conditionWear *= (1 + Math.random() * 0.5);
+        conditionWear *= (1 + ((route.risk || 3) / 12));
+        conditionWear *= (1 + Math.max(0, ((route.distance || 10) - (vehicleType.maxDistance || 100) * 0.35) / 180));
+        conditionWear *= (1.4 - (reliabilityBonus / 2));
         
-        // Operating costs
-        const operatingCost = revenue * 0.15; // 15% operating costs
+        const driverCost = ((vehicle.driver?.salaryPerHour || 220) / 60) * deltaTime;
+        const operatingCost = (revenue * (0.12 + ((route.risk || 3) / 40))) + driverCost;
         const profit = revenue - operatingCost;
 
         return {
             profit: Math.max(0, profit),
             fuelConsumed: Math.min(fuelConsumed, vehicle.fuel),
             conditionWear: Math.min(conditionWear, vehicle.condition),
-            passengers
+            passengers,
+            revenue,
+            operatingCost
         };
     }
 
@@ -93,5 +112,15 @@ export class Economy {
 
     updateDailyProfit(amount) {
         this.player.dailyProfit += amount;
+    }
+
+    adjustReputation(amount) {
+        this.player.reputation = Math.max(0, Math.min(100, (this.player.reputation || 0) + amount));
+        return this.player.reputation;
+    }
+
+    setReputation(value) {
+        this.player.reputation = Math.max(0, Math.min(100, value));
+        return this.player.reputation;
     }
 }

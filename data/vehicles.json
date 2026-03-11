@@ -3,11 +3,13 @@
         "id": "matatu_old",
         "name": "Old Reliable",
         "description": "A beat-up but functional 14-seater. Slow and prone to breakdowns, but it gets the job done.",
-        "cost": 0,
+        "cost": 45000,
         "capacity": 14,
         "speed": 5,
         "fuelCapacity": 40,
-        "reliability": 4
+        "reliability": 4,
+        "fuelEfficiency": 4,
+        "maxDistance": 50
     },
     {
         "id": "matatu_sound",
@@ -17,7 +19,9 @@
         "capacity": 18,
         "speed": 7,
         "fuelCapacity": 60,
-        "reliability": 6
+        "reliability": 6,
+        "fuelEfficiency": 6,
+        "maxDistance": 80
     },
     {
         "id": "matatu_modern",
@@ -27,6 +31,8 @@
         "capacity": 20,
         "speed": 8,
         "fuelCapacity": 70,
-        "reliability": 8
+        "reliability": 8,
+        "fuelEfficiency": 8,
+        "maxDistance": 120
     }
 ]

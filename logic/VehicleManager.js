@@ -3,6 +3,13 @@ export class VehicleManager {
         this.vehicles = [];
         this.vehicleTypes = [];
         this.nextVehicleId = 1;
+        this.driverTraits = [
+            'Steady under pressure',
+            'Knows the city shortcuts',
+            'Excellent with passengers',
+            'Fuel conscious operator',
+            'Keeps a clean cabin'
+        ];
         this.loadVehicleTypes();
     }
 
@@ -24,7 +31,7 @@ export class VehicleManager {
                 "id": "matatu_old",
                 "name": "Old Reliable",
                 "description": "A beat-up but functional 14-seater. Slow and prone to breakdowns, but it gets the job done.",
-                "cost": 0,
+                "cost": 45000,
                 "capacity": 14,
                 "speed": 5,
                 "fuelCapacity": 40,
@@ -61,7 +68,13 @@ export class VehicleManager {
 
     initializeVehicles(savedVehicles) {
         if (savedVehicles && Array.isArray(savedVehicles)) {
-            this.vehicles = savedVehicles;
+            this.vehicles = savedVehicles.map(vehicle => ({
+                ...vehicle,
+                nickname: vehicle.nickname || this.generateDefaultNickname(vehicle.name),
+                driver: Object.prototype.hasOwnProperty.call(vehicle, 'driver')
+                    ? vehicle.driver
+                    : this.createDriverProfile(vehicle.name, { legacy: true })
+            }));
             // Update nextVehicleId to be higher than any existing vehicle
             if (this.vehicles.length > 0) {
                 this.nextVehicleId = Math.max(...this.vehicles.map(v => v.id || 0)) + 1;
@@ -167,7 +180,8 @@ export class VehicleManager {
             status: 'idle',
             passengers: 0,
             totalEarnings: 0,
-            purchaseDate: Date.now()
+            purchaseDate: Date.now(),
+            driver: null
         };
 
         this.vehicles.push(newVehicle);
@@ -222,5 +236,53 @@ export class VehicleManager {
         
         console.log(`Vehicle ${vehicle.name} (ID: ${vehicleId}) removed from fleet`);
         return true;
+    }
+
+    createDriverProfile(vehicleName = 'Matatu', overrides = {}) {
+        const generatedName = this.generateDriverName(vehicleName);
+        const experience = overrides.experience || Math.floor(Math.random() * 4) + 2;
+        const salaryPerHour = overrides.salaryPerHour || (180 + experience * 25);
+
+        return {
+            name: overrides.name || generatedName,
+            trait: overrides.trait || this.driverTraits[Math.floor(Math.random() * this.driverTraits.length)],
+            experience,
+            salaryPerHour,
+            hiredAt: overrides.hiredAt || Date.now(),
+            legacy: Boolean(overrides.legacy)
+        };
+    }
+
+    updateDriver(vehicleId, driverProfile) {
+        const vehicle = this.getVehicleById(vehicleId);
+        if (!vehicle) return null;
+
+        vehicle.driver = {
+            ...(vehicle.driver || {}),
+            ...driverProfile
+        };
+
+        return vehicle.driver;
+    }
+
+    clearDriver(vehicleId) {
+        const vehicle = this.getVehicleById(vehicleId);
+        if (!vehicle) return false;
+
+        vehicle.driver = null;
+        if (vehicle.status === 'running' && vehicle.routeId) {
+            vehicle.status = 'idle';
+            vehicle.routeId = null;
+        }
+        return true;
+    }
+
+    generateDriverName(seed = 'Driver') {
+        const firstNames = ['Amani', 'Kato', 'Zuri', 'Tendo', 'Baraka', 'Asha', 'Imani', 'Juma'];
+        const lastNames = ['Okello', 'Nsubuga', 'Muwonge', 'Ssenfuma', 'Wekesa', 'Kaggwa', 'Nambassa', 'Odongo'];
+        const seedValue = seed.split('').reduce((total, char) => total + char.charCodeAt(0), 0);
+        const firstName = firstNames[seedValue % firstNames.length];
+        const lastName = lastNames[(seedValue * 3) % lastNames.length];
+        return `${firstName} ${lastName}`;
     }
 }

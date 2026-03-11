@@ -6,10 +6,16 @@ Welcome to **Matatu Empire**! You are a new entrepreneur in the bustling, fictio
 
 **[Play Matatu Empire Live](https://cruze-tech.github.io/Matatu-Empire/)**
 
+Built and maintained by **Cruze Intelligent Systems (U) LTD**.
+Website: **https://cruzeintelligentsystems.com**
+
 ## 🚀 How to Play
 
 1.  **Clone or Download:** Get the project files onto your local machine.
-2.  **Open `index.html`:** Simply open the `index.html` file in any modern web browser (like Chrome, Firefox, or Edge). No web server or build process is needed.
+2.  **Run it through a local server:** Because the game loads JSON data with `fetch`, open it through a lightweight local server instead of double-clicking `index.html`.
+    Example:
+    *   `python3 -m http.server`
+    *   Then open `http://localhost:8000`
 3.  **Start Your Empire:**
     *   You begin with **Ksh 50,000** and one **"Old Reliable"** matatu.
     *   Click on a route on the map (e.g., "Downtown > Industrial").

@@ -237,51 +237,33 @@ export class EventManager {
 
         let message = "";
         let toastType = "event";
+        let paidCost = true;
 
-        // Handle costs
+        // Handle upfront costs
         if (chosenOption.cost) {
-            if(this.game.economy.spendCash(chosenOption.cost)) {
+            if (this.game.economy.spendCash(chosenOption.cost)) {
                 message = `You paid Ksh ${chosenOption.cost.toLocaleString()}. `;
             } else {
                 message = `You couldn't afford Ksh ${chosenOption.cost.toLocaleString()}! `;
-                this.game.economy.getPlayerState().reputation -= 3;
+                this.game.economy.adjustReputation(-3);
                 toastType = "error";
+                paidCost = false;
             }
         }
 
-        // Handle penalties
-        if (chosenOption.penalty) {
-            this.game.economy.addCash(chosenOption.penalty);
-            message += `Lost Ksh ${(-chosenOption.penalty).toLocaleString()}. `;
-            toastType = "error";
-        }
-
-        // Handle bonuses
-        if (chosenOption.bonus) {
-            this.game.economy.addCash(chosenOption.bonus);
-            message += `Earned Ksh ${chosenOption.bonus.toLocaleString()}! `;
-            toastType = "success";
-        }
-
-        // Handle reputation changes
-        if (chosenOption.reputationChange) {
-            this.game.economy.getPlayerState().reputation += chosenOption.reputationChange;
-            // Clamp reputation between 0 and 100
-            this.game.economy.getPlayerState().reputation = Math.max(0, 
-                Math.min(100, this.game.economy.getPlayerState().reputation)
-            );
-            
-            if (chosenOption.reputationChange > 0) {
-                message += `Reputation improved! `;
-            } else {
-                message += `Reputation suffered. `;
-            }
-        }
-
-        // Handle success chance events
-        if (chosenOption.successChance !== undefined) {
+        if (!paidCost) {
+            message += 'Operations took a reputation hit.';
+        } else if (chosenOption.successChance !== undefined) {
             const success = Math.random() < chosenOption.successChance;
             if (success) {
+                if (chosenOption.bonus) {
+                    this.game.economy.addCash(chosenOption.bonus);
+                    message += `Earned Ksh ${chosenOption.bonus.toLocaleString()}! `;
+                }
+                if (chosenOption.reputationChange) {
+                    this.game.economy.adjustReputation(chosenOption.reputationChange);
+                    message += chosenOption.reputationChange > 0 ? 'Reputation improved! ' : 'Reputation suffered. ';
+                }
                 message += chosenOption.description || "It worked out!";
                 toastType = "success";
             } else {
@@ -295,10 +277,33 @@ export class EventManager {
                 } else {
                     message += "It didn't work out as planned.";
                 }
+                if (chosenOption.reputationChange) {
+                    this.game.economy.adjustReputation(Math.min(0, chosenOption.reputationChange));
+                }
                 toastType = "error";
             }
         } else {
+            if (chosenOption.penalty) {
+                this.game.economy.addCash(chosenOption.penalty);
+                message += `Lost Ksh ${(-chosenOption.penalty).toLocaleString()}. `;
+                toastType = "error";
+            }
+
+            if (chosenOption.bonus) {
+                this.game.economy.addCash(chosenOption.bonus);
+                message += `Earned Ksh ${chosenOption.bonus.toLocaleString()}! `;
+                toastType = "success";
+            }
+
+            if (chosenOption.reputationChange) {
+                this.game.economy.adjustReputation(chosenOption.reputationChange);
+                message += chosenOption.reputationChange > 0 ? 'Reputation improved! ' : 'Reputation suffered. ';
+            }
             message += chosenOption.description || "";
+        }
+
+        if (this.game.progressionManager && toastType === 'success') {
+            this.game.progressionManager.addXp(20, 'Handled city event', true);
         }
         
         this.game.dashboardUI.showToast(message, toastType);

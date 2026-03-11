@@ -16,8 +16,6 @@ export class MapUI {
         }
         
         this.renderInitialMap();
-        this.setupRouteCreation();
-        this.setupRouteDeletion();
         
         console.log('✅ MapUI initialized with', this.routes.length, 'routes');
     }
@@ -81,7 +79,9 @@ export class MapUI {
 
                 // Add click handler
                 routeGroup.addEventListener('click', () => {
-                    if (!this.routeCreationMode && !this.routeDeletionMode && this.onRouteClick) {
+                    if (this.routeDeletionMode) {
+                        this.deleteRoute(route.id);
+                    } else if (!this.routeCreationMode && this.onRouteClick) {
                         this.onRouteClick(route.id);
                     }
                 });
@@ -91,6 +91,9 @@ export class MapUI {
         }
 
         this.mapContainer.appendChild(svg);
+        this.setupRouteCreation();
+        this.setupRouteDeletion();
+        this.updateRouteSelectability();
         
         console.log(`✅ Map rendered with ${this.routes.length} routes`);
     }
@@ -602,6 +605,10 @@ export class MapUI {
                     'success'
                 );
             }
+
+            if (window.gameInstance.progressionManager) {
+                window.gameInstance.progressionManager.evaluateProgress();
+            }
             
             console.log('Multi-point route created:', newRoute);
         }
@@ -790,6 +797,9 @@ export class MapUI {
         if (window.gameInstance && window.gameInstance.managers.route) {
             window.gameInstance.managers.route.removeCustomRoute(routeId);
         }
+
+        this.routeDeletionMode = false;
+        this.hideDeletionInstructions();
         
         this.renderInitialMap();
         
