@@ -36,6 +36,8 @@ input, button, textarea, select { font: inherit; }
     display: grid !important;
     grid-template-columns: minmax(300px, 400px) 1fr !important;
     height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100svh !important;
     width: 100vw !important;
     overflow: hidden !important;
     gap: 0 !important;
@@ -46,8 +48,11 @@ input, button, textarea, select { font: inherit; }
     border-right: 2px solid var(--border-color) !important;
     display: flex !important;
     flex-direction: column !important;
+    min-height: 0 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
     position: relative !important;
 }
 
@@ -177,6 +182,7 @@ header h1 {
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
+    position: relative !important;
 }
 
 #fleet-container h2 {
@@ -186,16 +192,32 @@ header h1 {
     flex-shrink: 0 !important;
 }
 
+.fleet-scroll-hint {
+    display: none !important;
+    margin: -0.15rem 0 0.9rem 0 !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.82rem !important;
+    line-height: 1.4 !important;
+    flex-shrink: 0 !important;
+}
+
 #fleet-list {
     flex: 1 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding-right: 5px !important;
+    padding: 0.75rem 0.35rem 0.35rem 0 !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.08)) !important;
     min-height: 0 !important;
     /* Add these to prevent auto-scroll */
     scroll-behavior: auto !important;
     scrollbar-width: thin !important;
     scrollbar-color: var(--primary-color) var(--bg-dark) !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
 }
 
 #fleet-list::-webkit-scrollbar {
@@ -776,12 +798,14 @@ header h1 {
     }
     
     #main-panel {
-        padding: 0.5rem !important;
+        padding: 0 0.5rem calc(0.5rem + env(safe-area-inset-bottom, 0px)) 0.5rem !important;
     }
     
     header {
-        padding: 0.8rem !important;
-        margin: -0.5rem -0.5rem 0.8rem -0.5rem !important;
+        position: relative !important;
+        top: auto !important;
+        padding: calc(0.8rem + env(safe-area-inset-top, 0px)) 0.8rem 0.8rem !important;
+        margin: 0 -0.5rem 0.8rem -0.5rem !important;
     }
     
     header h1 {
@@ -795,6 +819,19 @@ header h1 {
     #dashboard-container, #fleet-container {
         padding: 1rem !important;
         margin: 0 0.5rem 0.8rem 0.5rem !important;
+    }
+
+    .fleet-scroll-hint {
+        display: block !important;
+    }
+
+    #fleet-container {
+        min-height: 250px !important;
+    }
+
+    #fleet-list {
+        min-height: 170px !important;
+        max-height: 42vh !important;
     }
     
     .dashboard-stats {
